@@ -2,7 +2,8 @@ import json
 import requests
 import os
 from dateutil.parser import parse
-from datetime import datetime
+from datetime import datetime, timedelta
+import pytz
 
 class TimeEntryEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -12,6 +13,15 @@ class TimeEntryEncoder(json.JSONEncoder):
         if isinstance(obj, TimeEntry):
             return obj.__dict__
 
+def truncateSeconds(dt):
+    return datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, tzinfo = dt.tzinfo)
+
+def roundToQuarterHour(dt):
+    roundTo = (int((dt.minute + 7.5) / 15) * 15) % 60
+    roundTo = 60 if dt.minute > 52 else roundTo
+    m = roundTo - dt.minute
+    return dt + timedelta(minutes = m) 
+
 class TimeEntry:
     def __init__(self, description = None, tags = None, duration = None,
             start = None, stop = None, duronly = None, pid = None,
@@ -19,9 +29,14 @@ class TimeEntry:
             id = None, uid = None):
         self.description = description
         self.tags = tags
-        self.duration = duration
-        self.start = self.truncateSeconds(parse(start))
-        self.stop = self.truncateSeconds(parse(stop))
+
+        if start != None:
+            self.start = roundToQuarterHour(truncateSeconds(parse(start)))
+
+        if stop != None:
+            self.stop = roundToQuarterHour(truncateSeconds(parse(stop)))
+
+        self.duration = (self.stop - self.start).seconds
         self.duronly = duronly
         self.pid = pid
         self.billable = billable
@@ -30,9 +45,6 @@ class TimeEntry:
         self.wid = wid
         self.id = id
         self.uid = uid
-
-    def truncateSeconds(self, dt):
-        return datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, tzinfo = dt.tzinfo)
 
     def __repr__(self):
         return "{0} - {1} - {2}".format(self.start, self.stop, self.duration)
@@ -46,20 +58,28 @@ def getHeaders():
     base64Token = "{0}:api_token".format(api_key).encode("base64").rstrip()
     return { "Authorization" : "Basic " + base64Token }
 
-def getTimeEntries():
+def getTimeEntries(startDate = None, endDate = None):
     headers = getHeaders()
-    resp = requests.get("https://www.toggl.com/api/v8/time_entries", headers = headers)
-    entries = []
-    # te = TimeEntry(**resp.json()['data'])
+    url = "https://www.toggl.com/api/v8/time_entries"
+    params = {}
+    if startDate != None:
+        params['start_date'] = startDate.isoformat()
 
+    if endDate != None:
+        params["end_date"] = endDate.isoformat()
+
+    resp = requests.get(url, headers = headers, params = params)
+    if resp.status_code != 200:
+        print("Response: {0} - {1}".format(resp.status_code, resp.text))
+        return []
+
+    entries = []
     for e in resp.json():
-       entry = TimeEntry(**e)
-       entries.append(entry)
+        print("Start: {0} - Stop: {1}".format(e['start'], e['stop']))
+        entry = TimeEntry(**e)
+        entries.append(entry)
 
     return entries
-
-def roundEntries(entries):
-    pass
 
 def updateEntries(entries):
     headers = getHeaders()
@@ -68,15 +88,15 @@ def updateEntries(entries):
         te = { "time_entry" : e}
         teJson = json.dumps(te, cls = TimeEntryEncoder)
         r = requests.put(url, headers = headers, data = teJson)
-        print(r.text)
-        print
-        # import time
-        # time.sleep(1)
+        if r.status_code != 200:
+            print("Failed to update time: {0}".format(resp.text))
+            return
 
 def main():
-    entries = getTimeEntries()
-    print(entries)
-    roundEntries(entries)
+    utc = pytz.utc
+    yesterday = datetime.utcnow() - timedelta(days = 1)
+    entries = getTimeEntries(startDate = datetime(yesterday.year,
+        yesterday.month, yesterday.day, tzinfo = utc))
     updateEntries(entries)
 
 if __name__ == "__main__":
