@@ -18,7 +18,6 @@ def truncateSeconds(dt):
 
 def roundToQuarterHour(dt):
     roundTo = int((dt.minute + 7.5) / 15) * 15 
-    # roundTo = 60 if dt.minute > 52 else roundTo
     m = roundTo - dt.minute
     return dt + timedelta(minutes = m) 
 
@@ -75,8 +74,9 @@ def getTimeEntries(startDate = None, endDate = None):
         return []
 
     entries = []
+    print("Found {0} item(s)".format(len(resp.json())))
     for e in resp.json():
-        # print("Start: {0} - Stop: {1}".format(e['start'], e['stop']))
+        print("Start: {0}".format(e['start']))
         entry = TimeEntry(**e)
         entries.append(entry)
 
