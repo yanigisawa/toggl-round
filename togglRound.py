@@ -17,8 +17,8 @@ def truncateSeconds(dt):
     return datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, tzinfo = dt.tzinfo)
 
 def roundToQuarterHour(dt):
-    roundTo = (int((dt.minute + 7.5) / 15) * 15) % 60
-    roundTo = 60 if dt.minute > 52 else roundTo
+    roundTo = int((dt.minute + 7.5) / 15) * 15 
+    # roundTo = 60 if dt.minute > 52 else roundTo
     m = roundTo - dt.minute
     return dt + timedelta(minutes = m) 
 
@@ -36,7 +36,8 @@ class TimeEntry:
         if stop != None:
             self.stop = roundToQuarterHour(truncateSeconds(parse(stop)))
 
-        self.duration = (self.stop - self.start).seconds
+        if start != None and stop != None:
+            self.duration = (self.stop - self.start).seconds
         self.duronly = duronly
         self.pid = pid
         self.billable = billable
@@ -75,7 +76,7 @@ def getTimeEntries(startDate = None, endDate = None):
 
     entries = []
     for e in resp.json():
-        print("Start: {0} - Stop: {1}".format(e['start'], e['stop']))
+        # print("Start: {0} - Stop: {1}".format(e['start'], e['stop']))
         entry = TimeEntry(**e)
         entries.append(entry)
 
@@ -94,7 +95,7 @@ def updateEntries(entries):
 
 def main():
     utc = pytz.utc
-    yesterday = datetime.utcnow() - timedelta(days = 1)
+    yesterday = datetime.utcnow() - timedelta(days = 10)
     entries = getTimeEntries(startDate = datetime(yesterday.year,
         yesterday.month, yesterday.day, tzinfo = utc))
     updateEntries(entries)
