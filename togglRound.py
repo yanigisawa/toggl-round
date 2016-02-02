@@ -70,13 +70,12 @@ def getTimeEntries(startDate = None, endDate = None):
 
     resp = requests.get(url, headers = headers, params = params)
     if resp.status_code != 200:
-        print("Response: {0} - {1}".format(resp.status_code, resp.text))
+        print("Failed to get time entries: Response: {0} - {1}".format(resp.status_code, resp.text))
         return []
 
     entries = []
     print("Found {0} item(s)".format(len(resp.json())))
     for e in resp.json():
-        print("Start: {0}".format(e['start']))
         entry = TimeEntry(**e)
         entries.append(entry)
 
@@ -99,6 +98,7 @@ def main():
     entries = getTimeEntries(startDate = datetime(yesterday.year,
         yesterday.month, yesterday.day, tzinfo = utc))
     updateEntries(entries)
+    print("Update Complete")
 
 if __name__ == "__main__":
     main()
