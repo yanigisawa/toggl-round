@@ -89,7 +89,7 @@ def updateEntries(entries):
         teJson = json.dumps(te, cls = TimeEntryEncoder)
         r = requests.put(url, headers = headers, data = teJson)
         if r.status_code != 200:
-            print("Failed to update time: {0}".format(resp.text))
+            print("Failed to update time: {0}".format(r.text))
             return
 
 def main():
