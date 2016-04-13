@@ -1,4 +1,5 @@
-from togglRound import roundToQuarterHour from datetime import datetime
+from togglRound import roundToQuarterHour 
+from datetime import datetime
 import pytz
 
 now = datetime.utcnow()
