@@ -1,9 +1,12 @@
 import json
 import requests
 import os
+import sys
 from dateutil.parser import parse
 from datetime import datetime, timedelta
 import pytz
+import base64
+import rollbar
 
 class TimeEntryEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -55,7 +58,7 @@ def getHeaders():
         print("'TOGGL_API_KEY' environment variable not set. Please set this variable to continue")
         return 
 
-    base64Token = "{0}:api_token".format(api_key).encode("base64").rstrip()
+    base64Token = base64.b64encode("{0}:api_token".format(api_key).encode()).decode()
     return { "Authorization" : "Basic " + base64Token }
 
 def getTimeEntries(startDate = None, endDate = None):
@@ -101,4 +104,14 @@ def main():
     print("Update Complete")
 
 if __name__ == "__main__":
-    main()
+    rollbar_key = os.environ.get("ROLLBAR_KEY")
+    if not rollbar_key:
+        print("'ROLLBAR_KEY' environment variable not set. Please set this variable to continue")
+        rollbar.report_message('Missing ROLLBAR_KEY environment variable', 'error')
+        sys.exit(1)
+    rollbar.init(rollbar_key, 'production')
+    try:
+        main()
+    except:
+        # catch-all
+        rollbar.report_exc_info()
