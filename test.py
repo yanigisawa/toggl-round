@@ -1,11 +1,12 @@
-from togglRound import roundToQuarterHour from datetime import datetime
+from togglRound import roundToQuarterHour 
+from datetime import datetime
 import pytz
 
 now = datetime.utcnow()
 utc = pytz.utc
 
-def test_06MinutesRoundsDown():
-    tmpDt = datetime(now.year, now.month, now.day, now.hour, 6, tzinfo=utc)
+def test_07MinutesRoundsDown():
+    tmpDt = datetime(now.year, now.month, now.day, now.hour, 7, tzinfo=utc)
     expected = datetime(now.year, now.month, now.day, now.hour, tzinfo=utc)
     assert(roundToQuarterHour(tmpDt).isoformat() == expected.isoformat())
 
@@ -24,8 +25,8 @@ def test_23MinutesRoundsUp():
     expected = datetime(now.year, now.month, now.day, now.hour, 30, tzinfo=utc)
     assert(roundToQuarterHour(tmpDt).isoformat() == expected.isoformat())
 
-def test_36MinutesRoundsDown():
-    tmpDt = datetime(now.year, now.month, now.day, now.hour, 36, tzinfo=utc)
+def test_37MinutesRoundsDown():
+    tmpDt = datetime(now.year, now.month, now.day, now.hour, 37, tzinfo=utc)
     expected = datetime(now.year, now.month, now.day, now.hour, 30, tzinfo=utc)
     assert(roundToQuarterHour(tmpDt).isoformat() == expected.isoformat())
 
