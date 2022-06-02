@@ -68,7 +68,7 @@ def getHeaders():
 
 def getTimeEntries(startDate = None, endDate = None):
     headers = getHeaders()
-    url = "https://www.toggl.com/api/v8/time_entries"
+    url = "https://api.track.toggl.com/api/v8/time_entries"
     params = {}
     if startDate != None:
         params['start_date'] = startDate.isoformat()
