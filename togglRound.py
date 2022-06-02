@@ -41,8 +41,6 @@ class TimeEntry:
             self.duration = duration
         elif start != None and stop != None:
             self.duration = (self.stop - self.start).seconds
-        else:
-            self.duration = 28800
 
         self.duronly = duronly
         self.pid = pid
