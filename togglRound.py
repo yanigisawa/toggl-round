@@ -136,7 +136,7 @@ def fillWithAdminTime(entries):
 def updateEntries(entries):
     headers = getHeaders()
     for e in entries:
-        url = "https://www.toggl.com/api/v8/time_entries/{0}".format(e.id)
+        url = "https://api.track.toggl.com/api/v8/time_entries/{0}".format(e.id)
         te = { "time_entry" : e}
         teJson = json.dumps(te, cls = TimeEntryEncoder)
         r = requests.put(url, headers = headers, data = teJson)
