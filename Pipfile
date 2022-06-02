@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+colorama = "*"
+nose = "*"
+py = "*"
+pytest = "*"
+python-dateutil = "*"
+python-termstyle = "*"
+pytz = "*"
+six = "*"
+sniffer = "*"
+requests = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.9"
