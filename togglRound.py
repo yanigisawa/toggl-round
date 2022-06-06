@@ -37,9 +37,7 @@ class TimeEntry:
         if stop != None:
             self.stop = roundToQuarterHour(truncateSeconds(parse(stop)))
 
-        if duration != None and duration > 0:
-            self.duration = duration
-        elif start != None and stop != None:
+        if start != None and stop != None:
             self.duration = (self.stop - self.start).seconds
 
         self.duronly = duronly
